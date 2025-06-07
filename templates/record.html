@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勤怠記録 - {{ record_date }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary-color: {{ primary_color | default('#0065ff') }};
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type='time'], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        a.button-link {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span class="icon">{{ icon | default('🕒') }}</span> {{ app_name }} - 勤怠記録</h1>
+    </header>
+
+    <div class="container">
+        <h2>記録ページ: {{ record_date }}</h2>
+        <form method="POST" action="{{ url_for('record_page', record_date=record_date) }}">
+            <div class="form-group">
+                <label for="clockIn">出勤時間:</label>
+                <input type="time" id="clockIn" name="clockIn" required>
+            </div>
+            <div class="form-group">
+                <label for="clockOut">退勤時間:</label>
+                <input type="time" id="clockOut" name="clockOut" required>
+            </div>
+
+            <div id="pre-eight-category-section" class="form-group" style="display:none;">
+                <label>8:00以前の時間の使い方は？</label>
+                <input type="radio" id="study" name="preEightCategory" value="自己学習">
+                <label for="study" style="display: inline-block; margin-right: 10px;">自己学習</label>
+                <input type="radio" id="work" name="preEightCategory" value="勤務">
+                <label for="work" style="display: inline-block;">勤務</label>
+            </div>
+
+            <div class="form-group">
+                <label for="memo">メモ:</label>
+                <textarea id="memo" name="memo" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <p>総勤務時間: <span id="total-hours">--</span> 時間</p>
+                <p>残業時間: <span id="overtime-hours">--</span> 時間</p>
+            </div>
+
+            <button type="submit">保存</button>
+            <a href="{{ url_for('home') }}" class="button-link">キャンセル</a>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clockInInput = document.getElementById('clockIn');
+            const preEightSection = document.getElementById('pre-eight-category-section');
+            
+            function togglePreEightSection() {
+                if (clockInInput.value && clockInInput.value < '08:00') {
+                    preEightSection.style.display = 'block';
+                } else {
+                    preEightSection.style.display = 'none';
+                }
+            }
+
+            if (clockInInput) {
+                clockInInput.addEventListener('change', togglePreEightSection);
+                // Initial check in case the value is pre-filled (e.g. on edit)
+                togglePreEightSection(); 
+            }
+        });
+    </script>
+</body>
+</html>
