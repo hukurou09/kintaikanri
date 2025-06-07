@@ -66,7 +66,7 @@ def home():
                            calendar_weeks=calendar_weeks,
                            stats=stats,
                            test_string=test_string_from_app,
-                           app_name='勤怠マネージャー',
+                           app_name='大輔専用勤怠管理',
                            primary_color='#0065ff',
                            icon='clock')
 
