@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import sqlite3
 import os
 from datetime import datetime, time, date
+import calendar
+import sys
+
+print("\n*** DIAGNOSTIC VERSION - kintaikanri/app.py (JUNE 8 07:45) ***\n")
+print(f"Python version: {sys.version}")
+print(f"Running from: {os.path.abspath(__file__)}")
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -38,28 +44,89 @@ def init_db():
 
 @app.route('/')
 def home():
-    # TODO: Fetch data for calendar and stats
-    return render_template('index.html', app_name='勤怠マネージャー', primary_color='#0065ff', icon='clock')
+    now = datetime.now()
+    year = now.year
+    month = now.month
+
+    month_name = now.strftime("%B")
+    cal = calendar.Calendar()
+    calendar_weeks = cal.monthdayscalendar(year, month)
+
+    stats = {
+        'total_hours_month': 0, # Placeholder
+        'total_overtime_month': 0 # Placeholder
+    }
+
+    # This was the test string from before simplification
+    test_string_from_app = "APP.PY IS UPDATED AND THIS STRING IS FROM HOME ROUTE JUNE 8 0700"
+    return render_template('index.html',
+                           year=year,
+                           month_num=month,
+                           month_name=month_name,
+                           calendar_weeks=calendar_weeks,
+                           stats=stats,
+                           test_string=test_string_from_app,
+                           app_name='勤怠マネージャー',
+                           primary_color='#0065ff',
+                           icon='clock')
 
 @app.route('/record/<string:record_date>', methods=['GET', 'POST'])
 def record_page(record_date):
-    # TODO: Implement record creation/update logic
+    # This is a placeholder, actual implementation needed
     return render_template('record.html', record_date=record_date, app_name='勤怠マネージャー', primary_color='#0065ff', icon='clock')
 
-# --- Utility functions (to be implemented based on prompt) ---
+@app.route('/test_direct')
+def test_direct_output():
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    # This was the test route from before simplification
+    return f"これはapp.pyからの直接出力テストです。 (kintaikanri/app.py) 現在時刻: {current_time}"
 
-def rounded_time(t_str, rounding_method):
-    # TODO: Implement rounding logic
-    pass
+# シンプル版のルートは削除して競合を避ける
 
-def calculate_hours(clock_in_str, clock_out_str, rounding_method):
-    # TODO: Implement hour calculation
-    pass
-
-def generate_monthly_pdf_data(month_year_str):
-    # TODO: Implement PDF data generation
-    pass 
+# ルートのレジスタ状況を確認するヘルパー関数
+def print_registered_routes():
+    print("\n==== REGISTERED ROUTES ====")
+    for rule in app.url_map.iter_rules():
+        print(f"{rule.endpoint}: {rule}")
+    print("============================\n")
 
 if __name__ == '__main__':
-    init_db() # Initialize database and table if they don't exist
-    app.run(debug=True)
+    print(f"\nFlask app object: {app}")
+    print(f"Secret key set: {'Yes' if app.secret_key else 'No'}")
+    
+    # 現在のURLマップを出力
+    print_registered_routes()
+    
+    print("\nAttempting to initialize database...")
+    try:
+        init_db()
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"❌ CRITICAL ERROR during init_db: {str(e)}")
+    
+    # 明示的に各ルートを確認
+    print("\nConfirming routes are registered properly:")
+    routes = [
+        ('/', 'home'),
+        ('/test_direct', 'test_direct_output'),
+        ('/record/<date>', 'record_page')
+    ]
+    
+    for path, endpoint in routes:
+        try:
+            url = url_for(endpoint, date='2025-06-08' if '<date>' in path else None)
+            print(f"✅ Route '{path}' -> {endpoint} is registered (URL: {url})")
+        except Exception as e:
+            print(f"❌ Route '{path}' -> {endpoint} is NOT properly registered: {str(e)}")
+    
+    # URLマップの最終確認
+    print_registered_routes()
+    
+    # デバッグモードを無効にし、ポートを5002に変更して明示的に起動
+    print("\n🚀 Starting Flask app on port 5002 (NO debug mode for clean startup)...")
+    try:
+        # 重要: デバッグモードを一時的に無効化して、リロードの問題を回避
+        app.run(host='127.0.0.1', port=5002, debug=False) 
+    except Exception as e:
+        print(f"❌ CRITICAL ERROR during app.run: {str(e)}")

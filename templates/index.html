@@ -18,12 +18,41 @@
 
     <div class="container">
         <h2>ホーム</h2>
-        
-        <!-- Calendar Component Placeholder -->
-        <div id="calendar">
-            <p>カレンダーはここに表示されます。</p>
-            <!-- Example: Link to record page for a specific date -->
-            <a href="{{ url_for('record_page', record_date='2024-07-01') }}">2024-07-01の記録へ</a>
+        {% if test_string %}
+        <p style="color: red; font-weight: bold;">TEST STRING: {{ test_string }}</p>
+        {% endif %}
+        <div class="calendar-view">
+            <h3>{{ year }}年 {{ month_num }}月 ({{ month_name }})</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th class="saturday-header">土</th><th class="sunday-header">日</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in calendar_weeks %}
+                    <tr>
+                        {% for day in week %}
+                            {% if day == 0 %}
+                        <td class="noday">&nbsp;</td>
+                            {% else %}
+                                {# Prepare date string in YYYY-MM-DD format #}
+                                {% set day_str_formatted = '%02d'|format(day) %}
+                                {% set record_date_str = '%d-%02d-%s'|format(year, month_num, day_str_formatted) %}
+                                {# Check if it's Saturday (loop.index == 6) or Sunday (loop.index == 7) #}
+                                {% if loop.index == 6 %} {# Saturday #}
+                        <td class="saturday day-cell"><a href="{{ url_for('record_page', record_date=record_date_str) }}">{{ day }}</a></td>
+                                {% elif loop.index == 7 %} {# Sunday #}
+                        <td class="sunday day-cell"><a href="{{ url_for('record_page', record_date=record_date_str) }}">{{ day }}</a></td>
+                                {% else %}
+                        <td class="day-cell"><a href="{{ url_for('record_page', record_date=record_date_str) }}">{{ day }}</a></td>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
         <!-- Stats Cards Placeholder -->
